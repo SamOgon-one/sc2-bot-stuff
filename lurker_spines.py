@@ -4,7 +4,7 @@ import sys
 from typing import Union
 from loguru import logger
 
-import sc2
+# sc2 imports
 from sc2 import maps
 from sc2.bot_ai import BotAI
 from sc2.data import Difficulty, Race
@@ -40,7 +40,6 @@ class Test_bot(BotAI):
             # await self.client.debug_create_unit([[UnitTypeId., quantity, spawn_point, owner 1: my 2: enemy]]) # 
             await self.client.debug_create_unit([[UnitTypeId.LURKERMPBURROWED, 1, point + Point2((3, 0)), 2]]) # enemy
             await self.client.debug_create_unit([[UnitTypeId.MARINE, 1, point + Point2((6, 0)), 1]]) # my
- 
 
         for effect in self.state.effects:
             if effect.id == EffectId.LURKERMP:
