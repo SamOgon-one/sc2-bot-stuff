@@ -1,9 +1,6 @@
 import os
 import sys
 
-from typing import Union
-from loguru import logger
-
 # sc2 imports
 from sc2 import maps
 from sc2.bot_ai import BotAI
