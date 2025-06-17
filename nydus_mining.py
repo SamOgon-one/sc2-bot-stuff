@@ -79,8 +79,6 @@ class Test_bot(BotAI):
                 break
 
      
-
-
 def main():
     run_game(
         maps.get("BlackburnAIE"),
