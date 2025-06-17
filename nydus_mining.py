@@ -1,3 +1,6 @@
+# The Nydus can unload one unit every 8 game frames. Here, with game_step = 2, that means it will unload one unit every 4 iterations.
+# The maximum throughput for a single mining base is likely around 16 drones continuously entering and exiting
+
 import os
 import sys
 
