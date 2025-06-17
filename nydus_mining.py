@@ -32,7 +32,7 @@ class Test_bot(BotAI):
             await self.client.debug_create_unit([[UnitTypeId.DRONE, 4, self.start_location, 1]])
             return
 
-        # set rally and queue rally back to nydus, so we don't need to give any orders to drones later on
+        # set rally and queue rally back to nydus, this avoids needing to manually command drones later
         if iteration == 1:
             nydus_network = self.structures(UnitTypeId.NYDUSNETWORK).first
             nydus_network(AbilityId.RALLY_BUILDING, self.townhalls.closest_to(nydus_network))
@@ -44,34 +44,38 @@ class Test_bot(BotAI):
             nydus_canal(AbilityId.RALLY_BUILDING, self.mineral_field.closest_to(nydus_canal))
             nydus_canal(AbilityId.RALLY_BUILDING, nydus_canal, queue=True)                       
 
-        # nydus mining: basicly unload drones from appropiate nydus
+        # nydus mining: basically unload drones from appropriate nydus
+
+        # workers outside nydus 
+        # mark if worker has resource, we will not see it when it's inside nydus
+        for worker in self.workers:     
+            # when nydus is close to townhal, after unload, workers jump back to nydus so fast, that there is no frame where can mark worker as without minerals                     
+            if not worker.is_carrying_resource or worker.orders and worker.orders[0].target in self.townhalls.tags:
+                self.worker_has_resource[worker.tag] = False
+
+            else: # elif worker.is_carrying_resource:
+                self.worker_has_resource[worker.tag] = True      
+
         nydus_network = self.structures(UnitTypeId.NYDUSNETWORK).first
         nydus_canal = self.structures(UnitTypeId.NYDUSCANAL).first # aka nydus worm        
                       
         # workers inside nydus 
-        # all nyduses shere same passengers
-        for worker in nydus_network.passengers:  
-            # unload NYDUSNETWORK
+        # all nyduses share same passengers
+        # unload NYDUSNETWORK
+        for worker in nydus_network.passengers:              
             if self.worker_has_resource[worker.tag]:
                 # custom unload method, based on: https://github.com/BurnySc2/python-sc2/blob/2e5d29671cf6ebcf78b1764c8153916b01c096ca/examples/protoss/single_unit_unload_test.py
                 # we can't use ability unload_all because we need to unload specific passenger
                 await self.client.unload_unit(transporter_unit=nydus_network, cargo_unit=worker)
                 break
 
-            # unload NYDUSCANAL
-            elif not self.worker_has_resource[worker.tag]:
+        # unload NYDUSCANAL
+        for worker in nydus_network.passengers:
+            if not self.worker_has_resource[worker.tag]:
                 await self.client.unload_unit(transporter_unit=nydus_canal, cargo_unit=worker)
                 break
 
-        # workers outside nydus 
-        # mark if worker has resource, we will not see it when it's inside
-        for worker in self.workers:     
-            # when nydus is close to townhal, after unlod, workers jump back to nydus so fast, that there is no frame where can mark worker as without minerals                     
-            if not worker.is_carrying_resource or worker.orders and worker.orders[0].target in self.townhalls.tags:
-                self.worker_has_resource[worker.tag] = False
-
-            elif worker.is_carrying_resource:
-                self.worker_has_resource[worker.tag] = True           
+     
 
 
 def main():
